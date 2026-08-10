@@ -17,6 +17,11 @@ async function main() {
         `,
       },
     ],
+    temperature: 0,
+    // top_p: 0.1,
+    // stop: 'ga',
+    // max_completion_tokens: 1000,
+    // frequency_penalty: 1,
   });
   console.log(completion.choices[0].message.content);
 }
