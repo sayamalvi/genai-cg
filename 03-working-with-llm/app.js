@@ -7,14 +7,28 @@ async function main() {
     messages: [
       {
         role: "system",
-        content: `You are ReviewAI, a smart review grader. Your task is to analyse given review and return the sentiment. Classify the revview as positive, neutral or negative. Output must be a single word. You must return result in valid JSON structure. 
-          Ex: {"sentiment": "Negative"}
+        content: `You are an interview grader assistant. Your task is to generate candidate evaluation score. Output must be following JSON structure.
+        {
+            "confidence": number (1-10 scale),
+            "accuracy": number (1-10 scale), 
+            "pass": boolean (true or false)
+        }
+        The response must: 
+            1. Include ALL fields shown above
+            2. Use only the exact data types specified
+            3. Follow the exact data types specified
+            4. Contain ONLY the JSON object and nothing else 
           `,
+
       },
       {
         role: "user",
-        content: `Review: These headphones arrived quickly and look great, but the left earcup stopped working after few days. 
-        Sentiment: 
+        content: `
+        Q. What does === do in javascript ?
+        A. It checks strict equality-both type and value must match
+
+        Q. How do you create a promise that resolves after 1 second
+        A. const p = new Promise(r=>setTimeout(r, 1000))
         `,
       },
     ],
@@ -23,7 +37,7 @@ async function main() {
     // stop: 'ga',
     // max_completion_tokens: 1000,
     // frequency_penalty: 1,
-    reasoning_format: { type: "json_object" },
+    response_format: { type: "json_object" },
   });
   console.log(completion.choices[0].message.content);
 }
