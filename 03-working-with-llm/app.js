@@ -23,6 +23,7 @@ async function main() {
     // stop: 'ga',
     // max_completion_tokens: 1000,
     // frequency_penalty: 1,
+    reasoning_format: { type: "json_object" },
   });
   console.log(completion.choices[0].message.content);
 }
