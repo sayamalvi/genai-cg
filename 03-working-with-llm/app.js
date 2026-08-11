@@ -7,8 +7,9 @@ async function main() {
     messages: [
       {
         role: "system",
-        content:
-          "You are ReviewAI, a smart review grader. Your task is to analyse given review and return the sentiment. Classify the revview as positive, neutral or negative. Output must be a single word",
+        content: `You are ReviewAI, a smart review grader. Your task is to analyse given review and return the sentiment. Classify the revview as positive, neutral or negative. Output must be a single word. You must return result in valid JSON structure. 
+          Ex: {"sentiment": "Negative"}
+          `,
       },
       {
         role: "user",
