@@ -3,42 +3,63 @@ import Groq from "groq-sdk";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 async function main() {
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-120b",
     messages: [
       {
         role: "system",
-        content: `You are an interview grader assistant. Your task is to generate candidate evaluation score. Output must be following JSON structure.
-        {
-            "confidence": number (1-10 scale),
-            "accuracy": number (1-10 scale), 
-            "pass": boolean (true or false)
-        }
-        The response must: 
-            1. Include ALL fields shown above
-            2. Use only the exact data types specified
-            3. Follow the exact data types specified
-            4. Contain ONLY the JSON object and nothing else 
-          `,
-
+        content: `You are a smart personal assistant who answers the asked question. 
+        You have access to the following tools:
+        1. searchWeb({query}: {query:string}) //Search the latet information and realtime data on the internet 
+        `,
       },
       {
         role: "user",
-        content: `
-        Q. What does === do in javascript ?
-        A. It checks strict equality-both type and value must match
-
-        Q. How do you create a promise that resolves after 1 second
-        A. const p = new Promise(r=>setTimeout(r, 1000))
-        `,
+        content: "when was iphone 16 launched ?",
       },
     ],
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "webSearch",
+          description:
+            "Search the latest information and realtime data on the internet",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The search query to perform search on",
+              },
+            },
+            required: ["query"],
+          },
+        },
+      },
+    ],
+    tool_choice: "auto",
     temperature: 0,
-    // top_p: 0.1,
-    // stop: 'ga',
-    // max_completion_tokens: 1000,
-    // frequency_penalty: 1,
-    response_format: { type: "json_object" },
   });
-  console.log(completion.choices[0].message.content);
+  const toolCalls = completion.choices[0].message.tool_calls;
+
+  if (!toolCalls) {
+    console.log(`Assistant: ${completion.choices[0].message.content}`);
+  }
+
+  for (const tool of toolCalls) {
+    console.log("tool: ", tool);
+    const functionName = tool.function.name;
+    const functionParams = tool.function.arguments;
+
+    if (functionName === "webSearch") {
+      const result = await webSearch(JSON.parse(functionParams));
+      console.log("Tool result");
+    }
+  }
 }
 main();
+async function webSearch({ query }) {
+  console.log("Calling web search");
+
+  return "Iphone was launched on 20 september 2024";
+}
