@@ -60,7 +60,7 @@ function App() {
           <h1 className="mx-auto font-semibold text-gray-200">New chat</h1>
         </header>
 
-        <ChatArea messages={messages} />
+        <ChatArea messages={messages} isLoading={isLoading} />
         
         <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </main>

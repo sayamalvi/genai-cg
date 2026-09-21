@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 
-const ChatArea = ({ messages }) => {
+const ChatArea = ({ messages, isLoading }) => {
   const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   return (
     <div id="chat-container" className="flex-1 overflow-y-auto custom-scrollbar pb-4">
@@ -48,6 +48,20 @@ const ChatArea = ({ messages }) => {
             </div>
           );
         })
+      )}
+      {isLoading && (
+        <div className="w-full transition-colors duration-200 hover:bg-[#2a2a2a]">
+          <div className="max-w-3xl mx-auto flex gap-4 px-4 py-6 md:px-6 md:py-8">
+            <div className="w-8 h-8 rounded-sm flex-shrink-0 flex items-center justify-center shadow-sm text-sm bg-emerald-600 text-white">
+              <i className="fa-solid fa-robot"></i>
+            </div>
+            <div className="flex items-center gap-1.5 h-8">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        </div>
       )}
       <div ref={endOfMessagesRef} />
     </div>
