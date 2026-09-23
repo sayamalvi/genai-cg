@@ -1,15 +1,18 @@
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
 import dotenv from "dotenv";
+import NodeCache from "node-cache";
 dotenv.config({ path: '../../.env' });
 
+const cache = new NodeCache({ stdTTL: 60 * 60 * 24 })
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const threadId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
 
 const systemMessage = {
     role: "system",
     content: ` You are a smart personal assistant.
-        If you know the answer to a question, answer it directly in plain english.
+        If you know the answer to a question, answer it directly in plain english.dd
         If the answer requires real-time, local, or up-to-date information, or if you don't know the answer, use the available tools.
         You have the following tool:
         1. searchWeb({query}: {query:string}) //Search the latet information and realtime data on the internet 
@@ -34,8 +37,9 @@ const systemMessage = {
         `,
 };
 
-export async function generate(userMessage) {
-    const messages = [systemMessage, { role: "user", content: userMessage }];
+export async function generate(userMessage, threadId) {
+    const baseMessage = [systemMessage, { role: "user", content: userMessage }];
+    const messages = cache.get(threadId) ?? baseMessage;
     while (true) {
         const completion = await groq.chat.completions.create({
             model: "openai/gpt-oss-120b",
@@ -67,6 +71,7 @@ export async function generate(userMessage) {
         const toolCalls = completion.choices[0].message.tool_calls;
 
         if (!toolCalls) {
+            cache.set(threadId, messages)
             return completion.choices[0].message.content;
         }
 

@@ -20,8 +20,8 @@ app.get('/', (req, res) => {
 // The /chat endpoint
 app.post('/chat', async (req, res) => {
     try {
-        const { message } = req.body;
-        const result = await generate(message)
+        const { message, threadId } = req.body;
+        const result = await generate(message, threadId)
         res.json({ message: result })
     } catch (error) {
         console.error("Error in /chat endpoint:", error);
