@@ -3,13 +3,15 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { TavilySearch } from "@langchain/tavily";
 import { tool } from "@langchain/core/tools";
 import z from "zod";
+import readline from "node:readline/promises";
+import { MemorySaver } from "@langchain/langgraph";
 
 async function main() {
   const model = new ChatGroq({
     model: "openai/gpt-oss-120b",
     temperature: 0,
   });
-  
+
   const search = new TavilySearch({
     maxResults: 3,
     topic: "general",
@@ -30,28 +32,44 @@ async function main() {
     },
   );
 
+  const checkpointer = new MemorySaver();
   const agent = createReactAgent({
     llm: model,
     tools: [search, calendarEvents],
+    checkpointer,
   });
 
-  const result = await agent.invoke({
-    messages: [
-      {
-        role: "system",
-        content: `You are a personal assistant. use provided tools to get the information if you don't have have it. current date and time ${new Date().toUTCString()}`,
-      },
-      {
-        role: "user",
-        content: "Hi, do i have any calls or meetings today ?",
-      },
-    ],
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
-  console.log(
-    "Assistant:",
-    result.messages[result.messages.length - 1].content,
-  );
+  while (true) {
+    const userQuery = await rl.question("You: ");
+    if (userQuery === "/bye") break;
+
+    const result = await agent.invoke(
+      {
+        messages: [
+          {
+            role: "system",
+            content: `You are a personal assistant. use provided tools to get the information if you don't have have it. current date and time ${new Date().toUTCString()}`,
+          },
+          {
+            role: "user",
+            content: userQuery,
+          },
+        ],
+      },
+      { configurable: { thread_id: 'conversation-1' } },
+    );
+
+    console.log(
+      "Assistant:",
+      result.messages[result.messages.length - 1].content,
+    );
+  }
+  rl.close();
 }
 
 main();
