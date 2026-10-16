@@ -3,13 +3,15 @@ import { tool } from "@langchain/core/tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatGroq } from "@langchain/groq";
 import z from "zod";
-import { MessagesAnnotation, StateGraph } from "@langchain/langgraph"; /**
+import {
+  MemorySaver,
+  MessagesAnnotation,
+  StateGraph,
+} from "@langchain/langgraph";
+import { printGraph } from "../utils.js";
+import readline from "node:readline/promises";
 
- * 1. bring llm
- * 2. build the graph
- * 3. invoke the agent
- * 4. add the memory
- */
+const checkpointer = new MemorySaver();
 
 const search = new TavilySearch({
   maxResults: 3,
@@ -40,13 +42,11 @@ const llm = new ChatGroq({
 }).bindTools(tools);
 
 async function callModel(state) {
-  console.log("calling llm");
   const response = await llm.invoke(state.messages);
   return { messages: [response] };
 }
 
 function shouldContinue(state) {
-  console.log("messages: ", state);
   const lastMessage = state.messages[state.messages.length - 1];
   if (lastMessage.tool_calls.length) {
     return "tools";
@@ -59,20 +59,40 @@ const graph = new StateGraph(MessagesAnnotation)
   .addNode("tools", toolNode)
   .addEdge("__start__", "llm")
   .addEdge("tools", "llm")
-  .addConditionalEdges("llm", shouldContinue);
+  .addConditionalEdges("llm", shouldContinue, {
+    __end__: END,
+    tools: "tools",
+  });
 
-const app = graph.compile();
+const app = graph.compile({ checkpointer });
 
 async function main() {
-  const result = await app.invoke({
-    messages: [
-      { role: "user", content: "what is the current weather in moscow" },
-    ],
-  });
-  const messages = result.messages;
-  const final = messages[messages.length - 1];
+  let config = { configurable: { thread_id: "1" } };
 
-  console.log("AI:", final.content);
+  await printGraph(app, "./customGraph.png");
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  while (true) {
+    const userInput = await rl.question("You: ");
+    if (userInput === "/bye") break;
+
+    const result = await app.invoke(
+      {
+        messages: [{ role: "user", content: userInput }],
+      },
+      config,
+    );
+
+    const messages = result.messages;
+    const final = messages[messages.length - 1];
+
+    console.log("AI:", final.content);
+  }
+  rl.close();
 }
 
 main();
