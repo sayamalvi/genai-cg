@@ -1,7 +1,7 @@
 # Project Plan
 
 - [x] Project setup
-- [ ] LLM setup
+- [x] LLM setup
 - [ ] Setup tools - create event, get event
 - [ ] Build the graph
 - [ ] Implement the tools - connect to Google calendar
