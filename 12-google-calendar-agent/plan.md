@@ -2,7 +2,7 @@
 
 - [x] Project setup
 - [x] LLM setup
-- [ ] Setup tools - create event, get event
+- [x] Setup tools - create event, get event
 - [ ] Build the graph
 - [ ] Implement the tools - connect to Google calendar
 - [ ] Test the agent
