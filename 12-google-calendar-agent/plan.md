@@ -6,5 +6,8 @@
 - [x] Build the graph
 - [x] Implement the tools - connect to Google calendar
 - [x] Test the agent
-- [ ] Terminal UI
-- [ ] Add memory
+- [x] Terminal UI
+- [x] Add memory
+
+
+- [ ] Fix timezone
