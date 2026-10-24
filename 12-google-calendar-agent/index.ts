@@ -40,7 +40,7 @@ const app = graph.compile();
 
 async function main() {
   const result = await app.invoke({
-    messages: [{ role: "user", content: "create a meeting for tomorrow" }],
+    messages: [{ role: "user", content: "Do I have any events for today ?" }],
   });
   console.log("AI: ", result.messages[result.messages.length - 1]?.content);
 }
