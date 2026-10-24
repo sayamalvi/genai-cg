@@ -60,28 +60,12 @@ export const createEvent = tool(
     schema: z.object({
       summary: z.string().describe("The title of the calendar event"),
       start: z.object({
-        dateTime: z
-          .string()
-          .describe(
-            "Event start date and time in ISO 8601 format, including UTC offset. Example: 2026-10-24T19:00:00+05:30",
-          ),
-        timeZone: z
-          .string()
-          .describe(
-            "IANA timezone of the event, e.g. Asia/Kolkata for Indian Standard Time",
-          ),
+        dateTime: z.string().describe("The date time of start of the event"),
+        timeZone: z.string().describe("Current IANA timezone string"),
       }),
       end: z.object({
-        dateTime: z
-          .string()
-          .describe(
-            "Event end date and time in ISO 8601 format, including UTC offset. Example: 2026-10-24T19:30:00+05:30",
-          ),
-        timeZone: z
-          .string()
-          .describe(
-            "IANA timezone of the event, e.g. Asia/Kolkata for Indian Standard Time",
-          ),
+        dateTime: z.string().describe("The date time of end of the event"),
+        timeZone: z.string().describe("Current IANA timezone string"),
       }),
       attendees: z
         .array(
@@ -143,10 +127,10 @@ export const getEvents = tool(
         ),
       timeMin: z
         .string()
-        .describe("The from datetime in UTC format for the event"),
+        .describe("The from datetime to get events"),
       timeMax: z
         .string()
-        .describe("The to datetime in UTC format for the event"),
+        .describe("The to datetime to get events"),
     }),
   },
 );

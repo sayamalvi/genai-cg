@@ -58,9 +58,21 @@ async function main() {
   while (true) {
     const userInput = await rl.question("You: ");
     if (userInput === "/bye") break;
+
+    const currentDateTime = new Date()
+      .toLocaleString("en-IN")
+      .replace(", ", "T")
+      .split(" ")[0];
+
+    const timeZoneString = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const result = await app.invoke(
       {
         messages: [
+          {
+            role: "system",
+            content: `You are a smart system assistant. Current datetime: ${currentDateTime}. Current timezone string ${timeZoneString}`,
+          },
           {
             role: "user",
             content: userInput,

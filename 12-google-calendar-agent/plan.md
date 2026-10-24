@@ -10,4 +10,5 @@
 - [x] Add memory
 
 
-- [ ] Fix timezone
+- [x] Fix timezone
+- [ ] Improve secrets
