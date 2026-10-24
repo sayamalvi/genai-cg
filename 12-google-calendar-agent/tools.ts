@@ -7,15 +7,92 @@ import tokens from "./tokens.json";
 oauth2Client.setCredentials(tokens);
 const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
+type attendee = {
+  email: string;
+  displayName: string;
+};
+
+type EventData = {
+  summary: string;
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
+  attendees: attendee[];
+};
+
 export const createEvent = tool(
-  () => {
-    return "the meeting has been created";
+  async (eventData: EventData) => {
+    const { summary, start, end, attendees } = eventData;
+    const res = await calendar.events.insert({
+      calendarId: "primary",
+      sendUpdates: "all",
+      requestBody: {
+        summary,
+        start,
+        end,
+        attendees,
+        conferenceData: {
+          createRequest: {
+            requestId: crypto.randomUUID(),
+            conferenceSolutionKey: {
+              type: "hangoutsMeet",
+            },
+          },
+        },
+      },
+      conferenceDataVersion: 1,
+    });
+    const event = res.data;
+    return JSON.stringify({
+      success: true,
+      id: event.id,
+      summary: event.summary,
+      start: event.start,
+      end: event.end,
+      attendees: event.attendees,
+      meetingLink: event.hangoutLink,
+      eventLink: event.htmlLink,
+      conferenceData: event.conferenceData,
+    });
   },
   {
     name: "create-event",
     description: "Call to create the calendar events",
     schema: z.object({
-      query: z.string().describe("Query for getting events"),
+      summary: z.string().describe("The title of the calendar event"),
+      start: z.object({
+        dateTime: z
+          .string()
+          .describe(
+            "Event start date and time in ISO 8601 format, including UTC offset. Example: 2026-10-24T19:00:00+05:30",
+          ),
+        timeZone: z
+          .string()
+          .describe(
+            "IANA timezone of the event, e.g. Asia/Kolkata for Indian Standard Time",
+          ),
+      }),
+      end: z.object({
+        dateTime: z
+          .string()
+          .describe(
+            "Event end date and time in ISO 8601 format, including UTC offset. Example: 2026-10-24T19:30:00+05:30",
+          ),
+        timeZone: z
+          .string()
+          .describe(
+            "IANA timezone of the event, e.g. Asia/Kolkata for Indian Standard Time",
+          ),
+      }),
+      attendees: z
+        .array(
+          z.object({
+            email: z.string().email().describe("Email address of the attendee"),
+            displayName: z.string().describe("Name of the attendee"),
+          }),
+        )
+        .describe(
+          "People invited to the event; use an empty array if there are no attendees",
+        ),
     }),
   },
 );
@@ -49,11 +126,11 @@ export const getEvents = tool(
           meetingLink: event.hangoutLink,
         };
       });
-      return JSON.stringify(result)
+      return JSON.stringify(result);
     } catch (error) {
       console.log(error);
     }
-    return "Failed to connect to the calendar"
+    return "Failed to connect to the calendar";
   },
   {
     name: "get-events",

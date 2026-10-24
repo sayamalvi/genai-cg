@@ -40,9 +40,20 @@ const app = graph.compile();
 
 async function main() {
   const result = await app.invoke({
-    messages: [{ role: "user", content: "Do I have any events for today ?" }],
+    messages: [
+      {
+        role: "user",
+        content: `
+      Create a Google Calendar event titled "Design Discussion"
+      for today at 7:00 PM India time.
+      Invite test (sayamalvi07@gmail.com).
+      Set the duration to 30 minutes.
+      Use the create-event tool.
+    `,
+      },
+    ],
   });
   console.log("AI: ", result.messages[result.messages.length - 1]?.content);
 }
 
-main()
+main();
