@@ -11,4 +11,4 @@
 
 
 - [x] Fix timezone
-- [ ] Improve secrets
+- [x] Improve secrets

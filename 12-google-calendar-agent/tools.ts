@@ -2,9 +2,12 @@ import { tool } from "@langchain/core/tools";
 import { google } from "googleapis";
 import z from "zod";
 import { oauth2Client } from "./server";
-import tokens from "./tokens.json";
 
-oauth2Client.setCredentials(tokens);
+oauth2Client.setCredentials({
+  access_token: process.env.GOOGLE_ACCESS_TOKEN,
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+});
+
 const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
 type attendee = {
@@ -125,12 +128,8 @@ export const getEvents = tool(
         .describe(
           "The query to be used to get events from google calendar. It can be one of these values: summary, description, location, attendees display name, attendees email, organiser\'s name, organiser\'s email",
         ),
-      timeMin: z
-        .string()
-        .describe("The from datetime to get events"),
-      timeMax: z
-        .string()
-        .describe("The to datetime to get events"),
+      timeMin: z.string().describe("The from datetime to get events"),
+      timeMax: z.string().describe("The to datetime to get events"),
     }),
   },
 );
