@@ -3,6 +3,8 @@ import { createEvent, getEvents } from "./tools";
 import { END, MessagesAnnotation, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import type { AIMessage } from "@langchain/core/messages";
+import readline from "node:readline/promises";
+import { stdout } from "node:process";
 
 const tools = [createEvent, getEvents];
 
@@ -39,21 +41,24 @@ const graph = new StateGraph(MessagesAnnotation)
 const app = graph.compile();
 
 async function main() {
-  const result = await app.invoke({
-    messages: [
-      {
-        role: "user",
-        content: `
-      Create a Google Calendar event titled "Design Discussion"
-      for today at 7:00 PM India time.
-      Invite test (sayamalvi07@gmail.com).
-      Set the duration to 30 minutes.
-      Use the create-event tool.
-    `,
-      },
-    ],
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: stdout,
   });
-  console.log("AI: ", result.messages[result.messages.length - 1]?.content);
+
+  while (true) {
+    const userInput = await rl.question("You: ");
+    if (userInput === "/bye") break;
+    const result = await app.invoke({
+      messages: [
+        {
+          role: "user",
+          content: userInput,
+        },
+      ],
+    });
+    console.log("AI: ", result.messages[result.messages.length - 1]?.content);
+  }
 }
 
 main();
