@@ -12,3 +12,10 @@
 
 - [x] Fix timezone
 - [x] Improve secrets
+
+# v2
+- [ ] Improve the system prompt
+- [ ] Update/Patch calendar event
+- [ ] Cancel the event
+- [ ] add new tool - contact tool to get the contacts / emails
+- [ ] add web search tool
