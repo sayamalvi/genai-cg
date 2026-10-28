@@ -10,6 +10,13 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 import type { AIMessage } from "@langchain/core/messages";
 import readline from "node:readline/promises";
 import { stdout } from "node:process";
+import CallbackHandler from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.LANGFUSE_BASE_URL,
+});
 
 const tools = [createEvent, getEvents];
 
@@ -53,7 +60,10 @@ async function main() {
     output: stdout,
   });
 
-  let config = { configurable: { thread_id: "1" } };
+  let config = {
+    configurable: { thread_id: "1" },
+    callbacks: [langfuseHandler],
+  };
 
   while (true) {
     const userInput = await rl.question("You: ");
